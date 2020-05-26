@@ -42,7 +42,6 @@ class App extends Component {
 
     getNewData = ()=>{
         axios.get("http://localhost:3001/user").then((data)=>{
-            console.log('>>>', data)
             this.setState({
                 dataSource: data.data,
                 total:data.data.length,
@@ -59,7 +58,10 @@ class App extends Component {
     //分页
     sizeChange = (current, size) => {
         // this.getNewData();
-
+        this.setState({
+            current:current,
+            total:(parseInt(current)-1)*size
+        })
         // let data = {
         //     search: 'slf',
         //     limit: size,

@@ -36,13 +36,9 @@ router.delete('/user/:id', async (ctx) => {
 });
 router.post('/user-search', koaBody(), async (ctx) => {
     const body = ctx.request.body;
-    console.log('body>>>', body)
     const user = await User.findAndCount({
-        // where: {
-        //     isdelete: 0, username: {
-        //         $like: `%${body.search}%`
-        //     }
-        // },
+        limit:body.limit,
+        offset:body.offset,
         where:{
             $or:[
                 {username:{$like : `%${body.value}%`} }, 
