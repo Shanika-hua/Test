@@ -35,40 +35,44 @@ class App extends Component {
         visible: false,
         modalType: "add",
         search: "",
-        editRow: {}
+        editRow: {},
+        limit:0,
+        offset:0
     }
 
     getNewData = ()=>{
         axios.get("http://localhost:3001/user").then((data)=>{
-            console.log('data>>>', data.data);
+            console.log('>>>', data)
             this.setState({
                 dataSource: data.data,
-                total:6,
-                current:1
+                total:data.data.length,
+                current:Math.ceil(data.data.length/this.state.size)
             })
         })
     }
    
     componentDidMount() {
+        this.getNewData();
         this.sizeChange(this.state.current, this.state.size);
-       this.getNewData();
     }
 
     //分页
     sizeChange = (current, size) => {
-        let data = {
-            search: 'slf',
-            limit: size,
-            // eslint-disable-next-line radix
-            offset: (parseInt(current) - 1) * size
-        }
-        axios.post("http://localhost:3002/user-search", data).then(data => {
-            this.setState({
-                dataSource: data.data.rows,
-                total: data.data.count,
-                current, size
-            })
-        })
+        // this.getNewData();
+
+        // let data = {
+        //     search: 'slf',
+        //     limit: size,
+        //     // eslint-disable-next-line radix
+        //     offset: (parseInt(current) - 1) * size
+        // }
+        // axios.post("http://localhost:3001/user-search", data).then(data => {
+        //     this.setState({
+        //         dataSource: data.data.rows,
+        //         total: data.data.count,
+        //         current, size
+        //     })
+        // })
     };
     //提交
     handleOk = () => {
@@ -80,23 +84,25 @@ class App extends Component {
             if (this.state.modalType === 'add') {
                 axios.post("http://localhost:3001/user", data)
                     .then(msg => {
-                        this.sizeChange(this.state.current, this.state.size);
+                        console.log('dataadd', data)
+                        // this.sizeChange(Math.ceil(data));
                         this.setState({visible: false});
-                        message.success('success!')
+                        this.getNewData();
+                        message.success('添加成功!')
                     })
             } else {
                 axios.put("http://localhost:3001/user/" + this.state.editRow.id, data)
                     .then(data => {
-                        this.sizeChange(this.state.current, this.state.size);
+                        this.sizeChange(this.state.current);
                         this.setState({visible: false});
-                        message.success('success!')
+                        this.getNewData();
+                        message.success('编辑成功!')
                     })
             }
         })
     }
     //添加编辑用户
     modal = (type, row) => {
-        console.log('row>>>', row);
         this.setState({
             visible: true,
             modalType: type
@@ -115,8 +121,7 @@ class App extends Component {
         })
     }
     remove = (row) => {
-        console.log('delete>>>', row);
-        // let _this = this;
+        let _this = this;
         confirm({
             title: '是否要删除该用户?',
             okText: '是',
@@ -124,28 +129,25 @@ class App extends Component {
             cancelText: 'No',
             onOk() {
                 axios.delete("http://localhost:3001/user/"+row.id)
-                    .then(data=>{
-                        console.log('dataDelete', data);
+                            .then(data=>{
                         // _this.sizeChange(_this.state.current, _this.state.size);
-                        // this.getNewData();
-                        message.success('success!')
+                       _this.getNewData();
+                        message.success('删除成功!')
                     })
             }
         });
     };
-    // search = (name) => {
-    //     this.setState({
-    //         search: name
-    //     }, () => {
-    //         this.sizeChange(1, 10)
-    //     })
-    // };
-    // search = ()=>{
-    //     axios.post("http://localhost:3001/user-search").then(data=>{
-    //         console.log("findData", data)
-    //         message.success('查询成功');
-    //     })
-    // }
+  
+    search = (value)=>{
+        axios.post("http://localhost:3001/user-search", {value}).then(data=>{
+            console.log('value>>>', value)
+            this.setState({
+                dataSource: data.data.rows,
+            })
+            this.sizeChange(data.data.rows.length/this.state.size, this.state.size)
+            message.success('查询成功!');
+        })
+    }
     
 
     render() {
@@ -163,7 +165,9 @@ class App extends Component {
         return (
             <div className="App">
                 <Row>
-                    <Search style={{width: 300}} onChange={this.search} onSearch={this.search1}/>
+                    <Search style={{width: 300}} onSearch={(value)=>{
+                        this.search(value);
+                    }}/>
                     <Button type="primary" style={{marginLeft: 20}} onClick={() => this.modal('add')}>添加用户</Button>
                 </Row>
                 <Row style={{paddingTop: 20}}>
