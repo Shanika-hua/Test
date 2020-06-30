@@ -5,5 +5,6 @@ import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 console.log("yyy");
 console.log("zzz");
+console.log("fix bug");
 ReactDOM.render(<App />, document.getElementById("root"));
 registerServiceWorker();
