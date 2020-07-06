@@ -13,6 +13,7 @@ router.get('/user', async (ctx, next) => {
 
 //存到数据库中
 router.post('/user', koaBody(), async (ctx) => {
+
     const user = await User.build(ctx.request.body).save();
     ctx.body = user;
 
@@ -37,8 +38,8 @@ router.delete('/user/:id', async (ctx) => {
 router.post('/user-search', koaBody(), async (ctx) => {
     const body = ctx.request.body;
     const user = await User.findAndCount({
-        limit:body.limit,
-        offset:body.offset,
+        // limit:4,
+        // offset:0,
         where:{
             $or:[
                 {username:{$like : `%${body.value}%`} }, 
